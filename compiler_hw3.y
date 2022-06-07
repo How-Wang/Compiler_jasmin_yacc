@@ -169,7 +169,26 @@ UnaryExpr
         : PrimaryExpr {$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
         | UnaryExpr INC {printf("INC\n");$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
         | UnaryExpr DEC {printf("DEC\n");$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
-        | unary_op cast_expression {printf("%s\n", $<item.value.s_val>1);$<item.type>$=$<item.type>2; $<item.value>$=$<item.value>2;}
+        | unary_op cast_expression {
+					///printf("%s\n", $<item.value.s_val>1);
+					$<item.type>$=$<item.type>2;
+                                        $<item.value>$=$<item.value>2;
+
+					if (strcmp($<item.value.s_val>1, "NEG") == 0){
+						if(strcmp($<item.value.s_val>2, "int32")==0){
+							fprintf(fp,"ineg\n");
+						}
+						else if(strcmp($<item.value.s_val>2, "float32") == 0){
+							fprintf(fp, "fneg\n");
+						}
+					}
+					else if (strcmp($<item.value.s_val>1, "NOT") == 0){
+						$<item.type>$ = "bool";
+						$<item.value>$= ! $<item.value>2;
+						fprintf(fp, "ixor\n");
+					}
+					
+				}
 ;
 
 cast_expression
@@ -191,17 +210,41 @@ multiplicative_expression
                                                                 }
 
                                                                 $<item.type>$=$<item.type>3;
-                                                                printf("%s\n", $<item.value.s_val>2);}
+								if((strcmp($<item.value.s_val>2,"MUL")==0)){
+									if(strcmp($<item.type>1,"int32")==0) { fprintf("imul\n"); }
+									else if (strcmp($<item.type>1,"float32")==0) { fprintf("fmul\n"); }
+								}
+                                                 		else if((strcmp($<item.value.s_val>2,"QUO")==0)){
+                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf("idiv\n"); }
+                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf("fdiv\n"); }
+	                                                        }
+								else if((strcmp($<item.value.s_val>2,"REM")==0)){
+                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf("irem\n"); }
+                                                                } 
+                                                                ///printf("%s\n", $<item.value.s_val>2);
+							}
+								
 ;
 
 additive_expression
         : multiplicative_expression                             {$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
-        | additive_expression add_op multiplicative_expression {if( strcmp($<item.type>1,$<item.type>3)!=0 ){
+        | additive_expression add_op multiplicative_expression {
+								if( strcmp($<item.type>1,$<item.type>3)!=0 ){
                                                                         printf("error:%d: invalid operation: %s (mismatched types %s and %s)\n"
                                                                         ,yylineno ,$<item.value.s_val>2, $<item.type>1,$<item.type>3);
                                                                 }
+
                                                                 $<item.type>$=$<item.type>3;
-                                                                printf("%s\n", $<item.value.s_val>2);}
+                                                                if((strcmp($<item.value.s_val>2,"ADD")==0)){
+                                                                        if(strcmp($<item.type>1,"int32")==0) { fprintf("iadd\n"); }
+                                                                        else if (strcmp($<item.type>1,"float32")==0) { fprintf("fadd\n"); }
+                                                                }
+                                                                else if((strcmp($<item.value.s_val>2,"SUB")==0)){
+                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf("isub\n"); }
+                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf("fsub\n"); }
+                                                                }
+								///printf("%s\n", $<item.value.s_val>2);
+								}
 ;
 
 relational_expression
@@ -293,7 +336,7 @@ mul_op
 unary_op
         : '+'  { $<item.value.s_val>$="POS"; }
         | '-'  { $<item.value.s_val>$="NEG"; }
-        | '!'  { $<item.value.s_val>$="NOT"; }
+        | '!'  { $<item.value.s_val>$="NOT"; fprintf(fp, "iconst_1\n"); }
 ;
 
 PrimaryExpr
@@ -309,19 +352,30 @@ Operand
 
 IdSet 
         : IDENT {
-                        $<item.value>$ = $<item.value>1; $<item.type>$ = $<item.type>1;
+                        $<item.value>$ = $<item.value>1;
                         symtable_type* tmp_table = lookup_symbol($<item.value.s_val>1);
                         if (!tmp_table){
                                 printf("error:%d: undefined: %s\n", yylineno+1, $<item.value.s_val>1);
                                 $<item.type>$ = "ERROR";
                         }
                         else{
-                                printf("IDENT (name=%s, address=%d)\n",$<item.value.s_val>1,tmp_table->address);
-                                $<item.type>$ = tmp_table->type;
-                        }
+                                /// printf("IDENT (name=%s, address=%d)\n",$<item.value.s_val>1,tmp_table->address);
+				$<item.type>$ = tmp_table->type;
+                        	if(strcmp(tmp_table->type,"float32")==0){
+					fprintf(fp,"fload %d\n", tmp_table->address);
+				}
+				else if(strcmp(tmp_table->type, "int32")==0){
+					fprintf(fp,"iload %d\n", tmp_table->address);
+				}
+				else if(strcmp(tmp_table->type, "bool")==0){
+					fprintf(fp, "iload %d\n", tmp_table->address);
+				}
+				else if(strcmp(tmp_table->table, "string")==0){
+					fprintf(fp, "aload %d\n", tmp_table->address);
+				}
+			}
           }
         | IDENT '(' CallParaList ')' {
-                        //      printf("call: %s\n", $<item.value.s_val>1);
                                 $<item.value>$ = $<item.value>1;
                                 $<item.type>$ = "func";
                                 char* temp_sig_str = (char *)malloc(sizeof(char)*10);
@@ -338,23 +392,28 @@ CallParaList
 
 Literal
         : INT_LIT       {
-                                printf("INT_LIT %d\n",         $<item.value.i_val>$);
-                                $<item.value>$= $<item.value>1;
+                                //printf("INT_LIT %d\n",         $<item.value.i_val>$);
+                                fprintf(fp, "ldc %d\n", $<item.value.i_val>1);
+				$<item.value>$= $<item.value>1;
                                 $<item.type>$ = "int32";
                         }
-        | FLOAT_LIT     {       printf("FLOAT_LIT %f\n",       $<item.value.f_val>$);
-                                 $<item.value>$= $<item.value>1;
-                                 $<item.type>$ = "float32";
+        | FLOAT_LIT     {       //printf("FLOAT_LIT %f\n",       $<item.value.f_val>$);
+                                fprintf(fp, "ldc %f\n", $<item.value.f_val>1);
+				$<item.value>$= $<item.value>1;
+                                $<item.type>$ = "float32";
                          }
 
         | BOOL_LIT      {
-                                if($<item.value.b_val>$ == true) printf("TRUE 1\n");
-                                else printf("FALSE 0\n");
+                                //if($<item.value.b_val>$ == true) printf("TRUE 1\n");
+                                //else printf("FALSE 0\n");
+				fprintf(fp, "%s\n", $<item.value.b_val>1? "iconst_1" : "iconst_0");
                                 $<item.value>$= $<item.value>1;
                                 $<item.type>$ = "bool";
                         }
-        | '"' STRING_LIT '"'{printf("STRING_LIT %s\n", $<item.value.s_val>2);
-                                $<item.value>$= $<item.value>2;
+        | '"' STRING_LIT '"'{
+                                fprintf(fp, "ldc \"%s\"\n", $<item.value.s_val>2);
+				
+				$<item.value>$= $<item.value>2;
                                 $<item.type>$ = "string";
                         }
 ;
