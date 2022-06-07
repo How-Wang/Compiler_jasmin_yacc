@@ -33,6 +33,7 @@
 
     /* Symbol table function - you can add new functions if needed. */
     /* parameters and return type can be changed */
+    FILE *fp;
     typedef struct symtable_node symtable_type;
     struct symtable_node{
         int level;
@@ -61,6 +62,8 @@
 
     /* Global variables */
     int label_number = 0;
+
+    symtable_stack_type* stack_head = NULL;
 
     bool g_has_error = false;
     FILE *fout = NULL;
@@ -169,7 +172,7 @@ FuncBlock
 ;
 
 FunctionUpBlock
-        : '{' :
+        : '{' 
 ;
 
 UnaryExpr
@@ -191,7 +194,7 @@ UnaryExpr
                                                 // lookup_symbol($<token.name>1) -> value.i_val++;
                                                 fprintf(fp, "ldc 1\n");
                                                 fprintf(fp, "iadd\n");
-                                                fprintf(fp, "istore %d\n", lookup_symbol($<token.name>1) ->  address);
+                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) ->  address);
                                         }
                                 }
                         }
@@ -212,7 +215,7 @@ UnaryExpr
                                                 // lookup_symbol($<token.name>1) -> value.i_val--;
                                                 fprintf(fp, "ldc 1\n");
                                                 fprintf(fp, "isub\n");
-                                                fprintf(fp, "istore %d\n", lookup_symbol($<token.name>1) ->  address);
+                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) ->  address);
                                         }
                                 }
                         }
@@ -231,7 +234,7 @@ UnaryExpr
 					} 
 					else if (strcmp($<item.value.s_val>1, "NOT") == 0){
 						$<item.type>$ = "bool";
-						$<item.value>$= ! $<item.value>2;
+						// $<item.value>$= ! $<item.value>2;
 						fprintf(fp, "ixor\n");
 					}
 					
@@ -258,15 +261,15 @@ multiplicative_expression
 
                                                                 $<item.type>$=$<item.type>1;
 								if((strcmp($<item.value.s_val>2,"MUL")==0)){
-									if(strcmp($<item.type>1,"int32")==0) { fprintf("imul\n"); }
-									else if (strcmp($<item.type>1,"float32")==0) { fprintf("fmul\n"); }
+									if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "imul\n"); }
+									else if (strcmp($<item.type>1,"float32")==0) { fprintf(fp, "fmul\n"); }
 								}
                                                  		else if((strcmp($<item.value.s_val>2,"QUO")==0)){
-                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf("idiv\n"); }
-                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf("fdiv\n"); }
+                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "idiv\n"); }
+                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf(fp, "fdiv\n"); }
 	                                                        }
 								else if((strcmp($<item.value.s_val>2,"REM")==0)){
-                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf("irem\n"); }
+                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "irem\n"); }
                                                                 } 
                                                                 ///printf("%s\n", $<item.value.s_val>2);
 							}
@@ -283,12 +286,12 @@ additive_expression
 
                                                                 $<item.type>$=$<item.type>1;
                                                                 if((strcmp($<item.value.s_val>2,"ADD")==0)){
-                                                                        if(strcmp($<item.type>1,"int32")==0) { fprintf("iadd\n"); }
-                                                                        else if (strcmp($<item.type>1,"float32")==0) { fprintf("fadd\n"); }
+                                                                        if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "iadd\n"); }
+                                                                        else if (strcmp($<item.type>1,"float32")==0) { fprintf(fp, "fadd\n"); }
                                                                 }
                                                                 else if((strcmp($<item.value.s_val>2,"SUB")==0)){
-                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf("isub\n"); }
-                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf("fsub\n"); }
+                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "isub\n"); }
+                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf(fp, "fsub\n"); }
                                                                 }
 								///printf("%s\n", $<item.value.s_val>2);
 								}
@@ -368,70 +371,70 @@ assignment_expression
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "ADD")){
-                                                                        if (strcmp("float32", $<token.type>3) == 0){
+                                                                        if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fadd\n");
-                                                                        }else if (strcmp("int32", $<token.type>3) == 0){
+                                                                        }else if (strcmp("int32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "iadd\n");
                                                                         }
 
                                                                         if(strcmp($<item.value.s_val>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "SUB")){
-                                                                        if (strcmp("float32", $<token.type>3) == 0){
+                                                                        if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fsub\n");
-                                                                        }else if (strcmp("int32", $<token.type>3) == 0){
+                                                                        }else if (strcmp("int32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "isub\n");
                                                                         }
 
                                                                         if(strcmp($<item.value.s_val>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "MUL")){
-                                                                        if (strcmp("float32", $<token.type>3) == 0){
+                                                                        if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fmul\n");
-                                                                        }else if (strcmp("int32", $<token.type>3) == 0){
+                                                                        }else if (strcmp("int32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "imul\n");
                                                                         }
 
                                                                         if(strcmp($<item.value.s_val>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "QUO")){
-                                                                        if (strcmp("float32", $<token.type>3) == 0){
+                                                                        if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fdiv\n");
-                                                                        }else if (strcmp("int32", $<token.type>3) == 0){
+                                                                        }else if (strcmp("int32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "idiv\n");
                                                                         }
 
                                                                         if(strcmp($<item.value.s_val>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
@@ -441,10 +444,10 @@ assignment_expression
                                                                         if(strcmp($<item.value.s_val>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
@@ -524,7 +527,7 @@ IdSet
 				else if(strcmp(tmp_table->type, "bool")==0){
 					fprintf(fp, "iload %d\n", tmp_table->address); // there is no bload
 				}
-				else if(strcmp(tmp_table->table, "string")==0){
+				else if(strcmp(tmp_table->type, "string")==0){
 					fprintf(fp, "aload %d\n", tmp_table->address);
 				}
 			}
@@ -630,6 +633,7 @@ Block
 BlockUp
         : '{' { create_symbol();}
 
+;
 
 StatementList 
         : Statement StatementList
@@ -691,12 +695,12 @@ ReturnType
                          // printf("func_signature: %s\n",funct_parameter);
                          fprintf(fp, ".method public static %s%s\n", str_funct_name, funct_parameter);
                          if (strcmp(str_funct_name, "main") == 0){
-                                 fprintf(".limit stack 100\n");
-                                 fprintf(".limit locals 100\n");
+                                 fprintf(fp, ".limit stack 100\n");
+                                 fprintf(fp, ".limit locals 100\n");
                          }
                          else{
-                                 fprintf(".limit stack 20\n");
-                                 fprintf(".limit locals 20\n");
+                                 fprintf(fp, ".limit stack 20\n");
+                                 fprintf(fp, ".limit locals 20\n");
                          }
                         }
         | Type          {
@@ -712,12 +716,12 @@ ReturnType
                          // printf("func_signature: %s\n",funct_parameter);
                          fprintf(fp, ".method public static %s%s\n", str_funct_name, funct_parameter);
                          if (strcmp(str_funct_name, "main") == 0){
-                                 fprintf(".limit stack 100\n");
-                                 fprintf(".limit locals 100\n");
+                                 fprintf(fp, ".limit stack 100\n");
+                                 fprintf(fp, ".limit locals 100\n");
                          }
                          else{
-                                 fprintf(".limit stack 20\n");
-                                 fprintf(".limit locals 20\n");
+                                 fprintf(fp, ".limit stack 20\n");
+                                 fprintf(fp, ".limit locals 20\n");
                          }
                         }
 
@@ -806,7 +810,7 @@ int main(int argc, char *argv[])
 
     /* Codegen output init */
     char *bytecode_filename = "hw3.j";
-    fout = fopen(bytecode_filename, "w");
+    fp = fopen(bytecode_filename, "w");
     CODEGEN(".source hw3.j\n");
     CODEGEN(".class public Main\n");
     CODEGEN(".super java/lang/Object\n");
@@ -814,7 +818,7 @@ int main(int argc, char *argv[])
     /* Symbol table init */
     // Add your code
     
-    symtable_stack_type* stack_head = NULL; // instructe here?
+    // symtable_stack_type* stack_head = NULL; // instructe here?
 
     yylineno = 0;
     yyparse();
@@ -823,7 +827,7 @@ int main(int argc, char *argv[])
     // Add your code
 
 	printf("Total lines: %d\n", yylineno);
-    fclose(fout);
+    fclose(fp);
     fclose(yyin);
 
     if (g_has_error) {
