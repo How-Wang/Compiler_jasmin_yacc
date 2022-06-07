@@ -26,14 +26,14 @@
     #define CODEGEN(...) \
         do { \
             for (int i = 0; i < g_indent_cnt; i++) { \
-                fprintf(fout, "\t"); \
+                fprintf(fp, "\t"); \
             } \
-            fprintf(fout, __VA_ARGS__); \
+            fprintf(fp, __VA_ARGS__); \
         } while (0)
 
     /* Symbol table function - you can add new functions if needed. */
     /* parameters and return type can be changed */
-    FILE *fp;
+   
     typedef struct symtable_node symtable_type;
     struct symtable_node{
         int level;
@@ -66,7 +66,7 @@
     symtable_stack_type* stack_head = NULL;
 
     bool g_has_error = false;
-    FILE *fout = NULL;
+    FILE *fp = NULL;
     int g_indent_cnt = 0;
     int global_level = -1;
     int global_address = 0;
@@ -693,12 +693,13 @@ ReturnType
                          strcat(funct_parameter, funct_parameterReturn);
                          insert_symbol(str_funct_name,"func",funct_parameter, 0);
                          // printf("func_signature: %s\n",funct_parameter);
-                         fprintf(fp, ".method public static %s%s\n", str_funct_name, funct_parameter);
                          if (strcmp(str_funct_name, "main") == 0){
+				 fprintf(fp, ".method public static main([Ljava/lang/String;)V\n");
                                  fprintf(fp, ".limit stack 100\n");
                                  fprintf(fp, ".limit locals 100\n");
                          }
                          else{
+				 fprintf(fp, ".method public static %s%s\n", str_funct_name, funct_parameter);
                                  fprintf(fp, ".limit stack 20\n");
                                  fprintf(fp, ".limit locals 20\n");
                          }
@@ -760,8 +761,14 @@ ParameterList
 ;
 
 ReturnStmt
-        : RETURN Expression     { printf("%creturn\n",$<item.type>2[0]);}
-        | RETURN        {printf("return\n");}
+        : RETURN Expression     { 
+					printf("%creturn\n",$<item.type>2[0]);
+					fprintf(fp, "%creturn\n", $<item.type>2[0]);
+				}
+        | RETURN        {
+				printf("return\n");
+				fprintf(fp,"return\n");
+			}
 ;
 
 PrintStmt
@@ -807,14 +814,14 @@ int main(int argc, char *argv[])
         printf("file `%s` doesn't exists or cannot be opened\n", argv[1]);
         exit(1);
     }
-
+	
     /* Codegen output init */
     char *bytecode_filename = "hw3.j";
     fp = fopen(bytecode_filename, "w");
     CODEGEN(".source hw3.j\n");
     CODEGEN(".class public Main\n");
     CODEGEN(".super java/lang/Object\n");
-
+	printf("hello 817\n");
     /* Symbol table init */
     // Add your code
     
@@ -822,7 +829,7 @@ int main(int argc, char *argv[])
 
     yylineno = 0;
     yyparse();
-
+	printf("hello 825\n");
     /* Symbol table dump */
     // Add your code
 
