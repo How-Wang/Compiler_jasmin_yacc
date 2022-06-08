@@ -764,9 +764,20 @@ Condition
 ;
 
 ForStmt
-        : FOR ForClause Block
-        | FOR { fprintf(fp, "L_for_begin:\n"); } Condition Block {fprintf(fp, "goto L_for_begin\n"); fprintf(fp, "L_for_exit:\n");}
+        : ForBegin ForClause ForBlock { fprintf(fp, "goto L_for_begin\n"); fprintf(fp, "L_for_exit:\n");}
+        | ForBegin Condition ForBlock { fprintf(fp, "goto L_for_begin\n"); fprintf(fp, "L_for_exit:\n");}
 ;
+
+ForBegin
+	: FOR { fprintf(fp, "L_for_begin:\n"); }
+;
+
+ForBlock
+	: ForBlockUp StatementList '}' {dump_symbol();}
+;
+
+ForBlockUp
+	 : '{' { create_symbol(); fprintf(fp, "ifeq L_for_exit\n"); }
 
 ForClause
         : InitStmt ';' Condition ';' PostStmt
