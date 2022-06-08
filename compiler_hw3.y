@@ -279,7 +279,6 @@ multiplicative_expression
 additive_expression
         : multiplicative_expression                             {$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
         | additive_expression add_op multiplicative_expression {
-								printf("hello add\n");
 								if( strcmp($<item.type>1,$<item.type>3)!=0 ){
                                                                         printf("error:%d: invalid operation: %s (mismatched types %s and %s)\n"
                                                                         ,yylineno ,$<item.value.s_val>2, $<item.type>1,$<item.type>3);
@@ -305,7 +304,52 @@ relational_expression
                                                                         ,yylineno ,$<item.value.s_val>2, $<item.type>1,$<item.type>3);
                                                                 }
                                                                 $<item.type>$="bool";
-                                                                printf("%s\n", $<item.value.s_val>2);}
+                                                                printf("%s\n", $<item.value.s_val>2);
+                                                                
+                                                                if(strcmp($<item.value.s_val>2, "LTR")==0){
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                                fprintf(fp, "fcmpl\niflt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++; 
+                                                                                label_number++;
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                                fprintf(fp, "isub\niflt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }
+                                                                }
+                                                                else if(strcmp($<item.value.s_val>2, "LEQ")==0){
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                                fprintf(fp, "fcmpl\nifle L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                                fprintf(fp, "isub\nifle L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }
+                                                                }
+                                                                else if(strcmp($<item.value.s_val>2, "GTR")==0){
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                                fprintf(fp, "fcmpl\nifgt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                                fprintf(fp, "isub\nifgt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }
+                                                                }else if(strcmp($<item.value.s_val>2, "GEQ")==0){
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                                fprintf(fp, "fcmpl\nifge L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                                fprintf(fp, "isub\nifge L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }
+                                                                }
+                                                        }
 ;
 
 equality_expression
@@ -315,7 +359,30 @@ equality_expression
                                                                         ,yylineno ,$<item.value.s_val>2, $<item.type>1,$<item.type>3);
                                                                 }
                                                                 $<item.type>$="bool";
-                                                                printf("%s\n", $<item.value.s_val>2);}
+                                                                printf("%s\n", $<item.value.s_val>2);
+                                                                if(strcmp($<item.value.s_val>2, "EQL")==0){
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($<item.type>3, "float32") == 0) {
+                                                                                fprintf(fp, "fcmpl\nifeq L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++; 
+                                                                                label_number++;
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($<item.type>3, "int32") == 0) {
+                                                                                fprintf(fp, "isub\nifeq L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++; 
+                                                                                label_number++;
+                                                                        }
+                                                                }
+                                                                else if(strcmp($<item.value.s_val>2, "NEQ")==0){
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($<item.type>3, "float32") == 0) {
+                                                                                fprintf(fp, "fcmpl\nifne L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($<item.type>3, "int32") == 0) {
+                                                                                fprintf(fp, "isub\nifne L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
+                                                                                label_number++;
+                                                                                label_number++;
+                                                                        }
+                                                                }
+                                                        }
 ;
 
 logical_and_expression
@@ -328,7 +395,11 @@ logical_and_expression
                                                                         printf("error:%d: invalid operation: (operator LAND not defined on %s)\n",yylineno,$<item.type>3);
                                                                 }
                                                                 $<item.type>$="bool";
-                                                                printf("LAND\n");}
+                                                                printf("LAND\n");
+                                                                fprintf(fp, "iand\n");                                                   
+                                                        }
+
+
 ;
 logical_or_expression
         : logical_and_expression                                {$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
@@ -341,7 +412,8 @@ logical_or_expression
                                                                 }
                                                                 $<item.value>$=$<item.value>3;
                                                                 $<item.type>$="bool";
-                                                                printf("LOR\n");// $<item.type>$ = "bool";
+                                                                printf("LOR\n");
+                                                                fprintf(fp, "ior\n");
                                                            }
 ;
 
@@ -355,7 +427,7 @@ assignment_expression
 
                                                                 $<item.value>$=$<item.value>1; // or $<>3?
                                                                 $<item.type>$=$<item.type>1;
-                                                                //printf("%s\n", $<item.value.s_val>2);
+                                                                printf("%s\n", $<item.value.s_val>2);
                                                                 
                                                                 if(strcmp($<item.value.s_val>2, "ASSIGN")){
                                                                         if(strcmp($<item.type>1, "int32") == 0){
@@ -461,9 +533,9 @@ Expression
 
 rel_op
         : '<'   { $<item.value.s_val>$="LTR"; }
-        | LEQ 
+        | LEQ   { $<item.value.s_val>$="LEQ"; }
         | '>'   { $<item.value.s_val>$="GTR"; }
-        | GEQ
+        | GEQ   { $<item.value.s_val>$="GEQ"; }
 ;
 
 equ_op
