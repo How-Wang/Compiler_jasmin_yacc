@@ -685,7 +685,26 @@ DeclarationStmt
                                                         ,yylineno, $<item.value.s_val>2, tem_table -> lineno);
                                                 insert_symbol($<item.value.s_val>2, $<item.value.s_val>3, "-", 0);
                                         }
-                                        else{ insert_symbol($<item.value.s_val>2, $<item.value.s_val>3, "-", 0); }}     
+                                        else{ 
+                                                insert_symbol($<item.value.s_val>2, $<item.value.s_val>3, "-", 0); 
+                                                if(strcmp($<item.value.s_val>3 , "int32") == 0){
+                                                        fprintf(fp, "ldc 0\n");
+                                                	fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                                else if(strcmp($<item.value.s_val>3, "float32") == 0){
+                                                        fprintf(fp, "ldc 0.0\n");
+                                                        fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                                else if(strcmp($<item.value.s_val>3, "string") == 0){
+                                                        fprintf(fp, "ldc \"\"\n");
+                                                       	fprintf(fp, "astore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                                else if(strcmp($<item.value.s_val>3, "bool") == 0){
+                                                        fprintf(fp, "ldc 0\n");
+                                                        fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                        }
+                                }     
         | VAR IDENT Type '=' Expression { symtable_type* tem_table = lookup_symbol($<item.value.s_val>2);
                                         if(tem_table && tem_table->level == global_level){
                                                 printf("error:%d: %s redeclared in this block. previous declaration at line %d\n"
