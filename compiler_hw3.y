@@ -168,7 +168,7 @@ FuncOpen
 ;
 
 FuncBlock
-	: FunctionUpBlock StatementList '}' { dump_symbol(); fprintf(fp, ".end method\n"); }
+	: FunctionUpBlock StatementList ReturnStmt '}' { dump_symbol(); fprintf(fp, ".end method\n"); }
 ;
 
 FunctionUpBlock
@@ -597,7 +597,7 @@ Statement
         | SwitchStmt
         | CaseStmt
         | PrintStmt NEWLINE
-        | ReturnStmt NEWLINE
+       /* | ReturnStmt NEWLINE*/
         | NEWLINE
 ;
 
@@ -619,7 +619,23 @@ DeclarationStmt
                                                         ,yylineno, $<item.value.s_val>2, tem_table -> lineno);
                                                 insert_symbol($<item.value.s_val>2, $<item.value.s_val>3, "-", 0);
                                         }
-                                        else{ insert_symbol($<item.value.s_val>2, $<item.value.s_val>3, "-", 0); }}
+                                        else{ 
+						insert_symbol($<item.value.s_val>2, $<item.value.s_val>3, "-", 0); 
+						if(strcmp($<item.value.s_val>3 , "int32") == 0){
+                                                	fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                                else if(strcmp($<item.value.s_val>3, "float32") == 0){
+                                                        fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                                else if(strcmp($<item.value.s_val>3, "string") == 0){
+                                                       	fprintf(fp, "astore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+                                                else if(strcmp($<item.value.s_val>3, "bool") == 0){
+                                                        fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>2) -> address);
+                                                }
+					}
+					
+					}
 ;
 
 
@@ -761,22 +777,27 @@ ParameterList
 ;
 
 ReturnStmt
-        : RETURN Expression     { 
+        : RETURN Expression NEWLINE { 
 					printf("%creturn\n",$<item.type>2[0]);
 					fprintf(fp, "%creturn\n", $<item.type>2[0]);
 				}
-        | RETURN        {
+        | RETURN NEWLINE       {
 				printf("return\n");
 				fprintf(fp,"return\n");
 			}
+	|	        {
+                                printf("return\n");
+                                fprintf(fp,"return\n");
+                        }
+	
 ;
 
 PrintStmt
         : PRINT '(' Expression ')'      {
                                                 // printf("PRINT %s\n", $<item.type>3);
-                                                if (strcmp("float", $<item.type>3) == 0){
+                                                if (strcmp("float32", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/print(F)V\n");
-                                                }else if (strcmp("int", $<item.type>3) == 0){
+                                                }else if (strcmp("int32", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/print(I)V\n");
                                                 }else if (strcmp("string", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/print(Ljava/lang/String;)V\n");
@@ -787,9 +808,9 @@ PrintStmt
                                         }
         | PRINTLN '(' Expression ')'    {
                                                 // printf("PRINTLN %s\n", $<item.type>3);
-                                                if (strcmp("float", $<item.type>3) == 0){
+                                                if (strcmp("float32", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/println(F)V\n");
-                                                }else if (strcmp("int", $<item.type>3) == 0){
+                                                }else if (strcmp("int32", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/println(I)V\n");
                                                 }else if (strcmp("string", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n");
