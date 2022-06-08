@@ -172,7 +172,7 @@ FuncBlock
 ;
 
 FunctionUpBlock
-        : '{' 
+        : '{'
 ;
 
 UnaryExpr
@@ -220,15 +220,15 @@ UnaryExpr
                                 }
                         }
         | unary_op cast_expression {
-					///printf("%s\n", $<item.value.s_val>1);
+					printf("%s\n", $<item.value.s_val>1);
 					$<item.type>$=$<item.type>2;
                                         $<item.value>$=$<item.value>2;
 
 					if (strcmp($<item.value.s_val>1, "NEG") == 0){
-						if(strcmp($<item.value.s_val>2, "int32")==0){
+						if(strcmp($<item.type>2, "int32")==0){
 							fprintf(fp,"ineg\n");
 						}
-						else if(strcmp($<item.value.s_val>2, "float32") == 0){
+						else if(strcmp($<item.type>2, "float32") == 0){
 							fprintf(fp, "fneg\n");
 						}
 					} 
@@ -237,7 +237,7 @@ UnaryExpr
 						// $<item.value>$= ! $<item.value>2;
 						fprintf(fp, "ixor\n");
 					}
-					
+				//printf("end unary cast\n");	
 				}
 ;
 
@@ -246,7 +246,7 @@ cast_expression
         | '(' Type ')' cast_expression {$<item.type>$=$<item.type>2; $<item.value>$=$<item.value>2;}
 
 multiplicative_expression
-        : cast_expression                               {$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
+        : cast_expression                               {printf("through mul cast~\n"); $<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
         | multiplicative_expression mul_op cast_expression {    if( !strcmp($<item.value.s_val>2,"REM") && strcmp($<item.type>1,"int32")){
                                                                         printf("error:%d: invalid operation: (operator REM not defined on %s)\n",yylineno,$<item.type>1);
                                                                 }
@@ -271,7 +271,7 @@ multiplicative_expression
 								else if((strcmp($<item.value.s_val>2,"REM")==0)){
                                                                          if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "irem\n"); }
                                                                 } 
-                                                                ///printf("%s\n", $<item.value.s_val>2);
+                                                                printf("%s\n", $<item.value.s_val>2);
 							}
 								
 ;
@@ -279,12 +279,13 @@ multiplicative_expression
 additive_expression
         : multiplicative_expression                             {$<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
         | additive_expression add_op multiplicative_expression {
+								printf("hello add\n");
 								if( strcmp($<item.type>1,$<item.type>3)!=0 ){
                                                                         printf("error:%d: invalid operation: %s (mismatched types %s and %s)\n"
                                                                         ,yylineno ,$<item.value.s_val>2, $<item.type>1,$<item.type>3);
                                                                 }
 
-                                                                $<item.type>$=$<item.type>1;
+                                                                $<item.type>$=$<item.type>3;
                                                                 if((strcmp($<item.value.s_val>2,"ADD")==0)){
                                                                         if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "iadd\n"); }
                                                                         else if (strcmp($<item.type>1,"float32")==0) { fprintf(fp, "fadd\n"); }
@@ -293,7 +294,7 @@ additive_expression
                                                                          if(strcmp($<item.type>1,"int32")==0) { fprintf(fp, "isub\n"); }
                                                                          else if (strcmp($<item.type>1,"float32")==0) { fprintf(fp, "fsub\n"); }
                                                                 }
-								///printf("%s\n", $<item.value.s_val>2);
+								printf("%s\n", $<item.value.s_val>2);
 								}
 ;
 
@@ -549,12 +550,12 @@ CallParaList
 
 Literal
         : INT_LIT       {
-                                //printf("INT_LIT %d\n",         $<item.value.i_val>$);
+                                printf("INT_LIT %d\n",         $<item.value.i_val>$);
                                 fprintf(fp, "ldc %d\n", $<item.value.i_val>1);
 				$<item.value>$= $<item.value>1;
                                 $<item.type>$ = "int32";
                         }
-        | FLOAT_LIT     {       //printf("FLOAT_LIT %f\n",       $<item.value.f_val>$);
+        | FLOAT_LIT     {       printf("FLOAT_LIT %f\n",       $<item.value.f_val>$);
                                 fprintf(fp, "ldc %f\n", $<item.value.f_val>1);
 				$<item.value>$= $<item.value>1;
                                 $<item.type>$ = "float32";
@@ -708,7 +709,7 @@ ReturnType
                          strcat(funct_parameter, funct_parameterDown);
                          strcat(funct_parameter, funct_parameterReturn);
                          insert_symbol(str_funct_name,"func",funct_parameter, 0);
-                         // printf("func_signature: %s\n",funct_parameter);
+                         printf("func_signature: %s\n",funct_parameter);
                          if (strcmp(str_funct_name, "main") == 0){
 				 fprintf(fp, ".method public static main([Ljava/lang/String;)V\n");
                                  fprintf(fp, ".limit stack 100\n");
@@ -730,12 +731,12 @@ ReturnType
                          strcat(funct_parameter, funct_parameterDown);
                          strcat(funct_parameter, funct_parameterReturn);
                          insert_symbol(str_funct_name,"func",funct_parameter, 0);
-                         // printf("func_signature: %s\n",funct_parameter);
+                        // printf("func_signature: %s\n",funct_parameter);
                          fprintf(fp, ".method public static %s%s\n", str_funct_name, funct_parameter);
                          if (strcmp(str_funct_name, "main") == 0){
                                  fprintf(fp, ".limit stack 100\n");
                                  fprintf(fp, ".limit locals 100\n");
-                         }
+      			 }
                          else{
                                  fprintf(fp, ".limit stack 20\n");
                                  fprintf(fp, ".limit locals 20\n");
@@ -794,7 +795,7 @@ ReturnStmt
 
 PrintStmt
         : PRINT '(' Expression ')'      {
-                                                // printf("PRINT %s\n", $<item.type>3);
+                                                printf("PRINT %s\n", $<item.type>3);
                                                 if (strcmp("float32", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/print(F)V\n");
                                                 }else if (strcmp("int32", $<item.type>3) == 0){
@@ -807,7 +808,7 @@ PrintStmt
                                                 }
                                         }
         | PRINTLN '(' Expression ')'    {
-                                                // printf("PRINTLN %s\n", $<item.type>3);
+                                                printf("PRINTLN %s\n", $<item.type>3);
                                                 if (strcmp("float32", $<item.type>3) == 0){
                                                         fprintf(fp, "getstatic java/lang/System/out Ljava/io/PrintStream;\nswap\ninvokevirtual java/io/PrintStream/println(F)V\n");
                                                 }else if (strcmp("int32", $<item.type>3) == 0){
