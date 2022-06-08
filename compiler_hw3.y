@@ -70,6 +70,11 @@
     int g_indent_cnt = 0;
     int global_level = -1;
     int global_address = 0;
+
+    int case_num = 0;
+    int switch_num = 0;
+    int continue_num = 0;
+
     char *str_funct_name;
     char *funct_parameter;
     char *funct_parameterUp;
@@ -611,6 +616,7 @@ IdSet
                                 char* temp_sig_str = (char *)malloc(sizeof(char)*10);
                                 temp_sig_str = find_para($<item.value.s_val>1);
                                 printf("call: %s%s\n", $<item.value.s_val>1, temp_sig_str);
+                                fprintf(fp, "invokestatic Main/%s%s\n", $<item.value.s_val>1, temp_sig_str);
                         }
 ;
 
@@ -672,7 +678,6 @@ Statement
         | SwitchStmt
         | CaseStmt
         | PrintStmt NEWLINE
-       /* | ReturnStmt NEWLINE*/
         | NEWLINE
 ;
 
@@ -801,16 +806,48 @@ PostStmt
 ;
 
 SwitchStmt
-        : SWITCH Expression Block
+        : SWITCH Expression SwitchBlockUp StatementList '}' {
+                                                dump_symbol();
+                                                fprintf(fp, "L_switch_begin_%d:\n", switch_num);
+                                                fprintf(fp, "lookupswitch\n");
+                                                for(int i = continue_num ; i > 0 ; i-- ){
+                                                        if (i == 1){
+                                                                fprintf(fp, "default: L_case_%d\n", case_num);
+                                                        }
+                                                        else{
+                                                                fprintf(fp,"%d: L_case_%d\n", case_num-i+1 , case_num-i+1);
+                                                        }
+                                                }
+                                                fprintf(fp, "L_switch_end_%d:\n", switch_num);
+                                                // fprintf(fp, "return\n");
+                                                switch_num ++;
+                                                continue_num = 0;
+                                }
 ;
+
+SwitchBlockUp
+        : '{'           { create_symbol(); fprintf(fp, "goto L_switch_begin_%d\n", switch_num); }
 
 CaseStmt
-        : CaseUp Block
-        | DEFAULT Block
+        : CaseUp Block          { fprintf(fp, "goto L_switch_end_%d\n", switch_num); dump_symbol();}
+        | DeafaultUp Block         { fprintf(fp, "goto L_switch_end_%d\n", switch_num); dump_symbol();}
 ;
 
+DeafaultUp
+        : DEFAULT {             create_symbol();
+                                printf("case %d\n", case_num + 1);
+                                fprintf(fp, "L_case_%d:\n", case_num + 1);
+                                case_num ++;
+                                continue_num ++;
+                  }
+
 CaseUp
-        : CASE INT_LIT  {printf("case %d\n", $<item.value.i_val>2);}
+        : CASE INT_LIT  {       create_symbol();
+                                printf("case %d\n", $<item.value.i_val>2);
+                                fprintf(fp, "L_case_%d:\n", $<item.value.i_val>2);
+                                case_num =  $<item.value.i_val>2;
+                                continue_num ++;
+                        }
 ;
 
 ReturnType
