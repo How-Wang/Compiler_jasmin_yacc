@@ -450,13 +450,13 @@ assignment_expression
                                                                                 fprintf(fp, "iadd\n");
                                                                         }
 
-                                                                        if(strcmp($<item.value.s_val>1, "int32") == 0){
+                                                                        if(strcmp($<item.type>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.type>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.type>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
@@ -467,13 +467,13 @@ assignment_expression
                                                                                 fprintf(fp, "isub\n");
                                                                         }
 
-                                                                        if(strcmp($<item.value.s_val>1, "int32") == 0){
+                                                                        if(strcmp($<item.type>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.type>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.type>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
@@ -484,13 +484,13 @@ assignment_expression
                                                                                 fprintf(fp, "imul\n");
                                                                         }
 
-                                                                        if(strcmp($<item.value.s_val>1, "int32") == 0){
+                                                                        if(strcmp($<item.type>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.type>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.type>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
@@ -501,26 +501,26 @@ assignment_expression
                                                                                 fprintf(fp, "idiv\n");
                                                                         }
 
-                                                                        if(strcmp($<item.value.s_val>1, "int32") == 0){
+                                                                        if(strcmp($<item.type>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.type>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.type>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "REM")==0){
                                                                         fprintf(fp, "irem\n");
 
-                                                                        if(strcmp($<item.value.s_val>1, "int32") == 0){
+                                                                        if(strcmp($<item.type>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "float32") == 0){
+                                                                        else if(strcmp($<item.type>1, "float32") == 0){
                                                                                 fprintf(fp, "fstore %d\n", lookup_symbol($<item.value.s_val>1) -> address);
                                                                         }
-                                                                        else if(strcmp($<item.value.s_val>1, "string") == 0){
+                                                                        else if(strcmp($<item.type>1, "string") == 0){
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
