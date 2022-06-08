@@ -429,7 +429,7 @@ assignment_expression
                                                                 $<item.type>$=$<item.type>1;
                                                                 printf("%s\n", $<item.value.s_val>2);
                                                                 
-                                                                if(strcmp($<item.value.s_val>2, "ASSIGN")){
+                                                                if(strcmp($<item.value.s_val>2, "ASSIGN")==0){
                                                                         if(strcmp($<item.type>1, "int32") == 0){
                                                                                fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
@@ -443,7 +443,7 @@ assignment_expression
                                                                                 fprintf(fp, "istore %d\n", lookup_symbol($<item.value.s_val>1) -> address); 
                                                                         }
                                                                 }
-                                                                else if(strcmp($<item.value.s_val>2, "ADD")){
+                                                                else if(strcmp($<item.value.s_val>2, "ADD")==0){
                                                                         if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fadd\n");
                                                                         }else if (strcmp("int32", $<item.type>3) == 0){
@@ -460,7 +460,7 @@ assignment_expression
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
-                                                                else if(strcmp($<item.value.s_val>2, "SUB")){
+                                                                else if(strcmp($<item.value.s_val>2, "SUB")==0){
                                                                         if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fsub\n");
                                                                         }else if (strcmp("int32", $<item.type>3) == 0){
@@ -477,7 +477,7 @@ assignment_expression
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
-                                                                else if(strcmp($<item.value.s_val>2, "MUL")){
+                                                                else if(strcmp($<item.value.s_val>2, "MUL")==0){
                                                                         if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fmul\n");
                                                                         }else if (strcmp("int32", $<item.type>3) == 0){
@@ -494,7 +494,7 @@ assignment_expression
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
-                                                                else if(strcmp($<item.value.s_val>2, "QUO")){
+                                                                else if(strcmp($<item.value.s_val>2, "QUO")==0){
                                                                         if (strcmp("float32", $<item.type>3) == 0){
                                                                                 fprintf(fp, "fdiv\n");
                                                                         }else if (strcmp("int32", $<item.type>3) == 0){
@@ -511,7 +511,7 @@ assignment_expression
                                                                                 fprintf(fp, "astore\n");
                                                                         }
                                                                 }
-                                                                else if(strcmp($<item.value.s_val>2, "REM")){
+                                                                else if(strcmp($<item.value.s_val>2, "REM")==0){
                                                                         fprintf(fp, "irem\n");
 
                                                                         if(strcmp($<item.value.s_val>1, "int32") == 0){
