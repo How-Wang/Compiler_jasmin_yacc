@@ -652,10 +652,12 @@ ConversionExpr
         : Type '(' Expression ')' {
                 if (strcmp($<item.type>3, "float32") == 0 && strcmp($<item.value.s_val>1, "int32") == 0){
                         printf("f2i\n");
+                        fprintf(fp,"f2i\n");
                         $<item.type>$ = "int32";
                 }
                 else if (strcmp($<item.type>3, "int32") == 0 && strcmp($<item.value.s_val>1, "float32") == 0){
                         printf("i2f\n");
+                        fprintf(fp, "i2f\n");
                         $<item.type>$ = "float32";
                 }
                 }
