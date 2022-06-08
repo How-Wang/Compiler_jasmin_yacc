@@ -246,7 +246,7 @@ cast_expression
         | '(' Type ')' cast_expression {$<item.type>$=$<item.type>2; $<item.value>$=$<item.value>2;}
 
 multiplicative_expression
-        : cast_expression                               {printf("through mul cast~\n"); $<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
+        : cast_expression                               { $<item.type>$=$<item.type>1; $<item.value>$=$<item.value>1;}
         | multiplicative_expression mul_op cast_expression {    if( !strcmp($<item.value.s_val>2,"REM") && strcmp($<item.type>1,"int32")){
                                                                         printf("error:%d: invalid operation: (operator REM not defined on %s)\n",yylineno,$<item.type>1);
                                                                 }
@@ -307,43 +307,43 @@ relational_expression
                                                                 printf("%s\n", $<item.value.s_val>2);
                                                                 
                                                                 if(strcmp($<item.value.s_val>2, "LTR")==0){
-                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($<item.type>3, "float32") == 0) {
                                                                                 fprintf(fp, "fcmpl\niflt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++; 
                                                                                 label_number++;
-                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($<item.type>3, "int32") == 0) {
                                                                                 fprintf(fp, "isub\niflt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "LEQ")==0){
-                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($<item.type>3, "float32") == 0) {
                                                                                 fprintf(fp, "fcmpl\nifle L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
-                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($<item.type>3, "int32") == 0) {
                                                                                 fprintf(fp, "isub\nifle L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
                                                                         }
                                                                 }
                                                                 else if(strcmp($<item.value.s_val>2, "GTR")==0){
-                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($<item.type>3, "float32") == 0) {
                                                                                 fprintf(fp, "fcmpl\nifgt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
-                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($<item.type>3, "int32") == 0) {
                                                                                 fprintf(fp, "isub\nifgt L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
                                                                         }
                                                                 }else if(strcmp($<item.value.s_val>2, "GEQ")==0){
-                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($item.type>3, "float32") == 0) {
+                                                                        if (strcmp($<item.type>1, "float32") == 0 && strcmp($<item.type>3, "float32") == 0) {
                                                                                 fprintf(fp, "fcmpl\nifge L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
-                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($item.type>3, "int32") == 0) {
+                                                                        }else if (strcmp($<item.type>1, "int32") == 0 && strcmp($<item.type>3, "int32") == 0) {
                                                                                 fprintf(fp, "isub\nifge L_cmp_%d\niconst_0\ngoto L_cmp_%d\nL_cmp_%d:\niconst_1\nL_cmp_%d:\n", label_number, label_number + 1, label_number, label_number + 1);
                                                                                 label_number++;
                                                                                 label_number++;
