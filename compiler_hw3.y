@@ -751,9 +751,18 @@ StatementList
 ;
 
 IfStmt
-        : IF Condition Block
-        | IF Condition Block ELSE IfStmt
-        | IF Condition Block ELSE Block
+        : IF Condition IfBlock		{fprintf(fp, "L_if_exit:\n");}
+        | IF Condition IfBlock ELSE IfStmt
+        | IF Condition IfBlock ELSE Block
+;
+
+IfBlock
+	: IfBlockUp StatementList '}' {dump_symbol();}
+
+;
+
+IfBlockUp
+	: '{' { create_symbol(); fprintf(fp, "ifeq L_if_exit\n");}
 ;
 
 Condition
