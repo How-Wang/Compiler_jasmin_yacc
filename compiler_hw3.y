@@ -738,7 +738,7 @@ ExpressionStmt
 ;
 
 Block
-        : BlockUp StatementList '}' {dump_symbol(); fprintf(fp, "goto L_for_begin\n"); fprintf(fp, "L_for_exit:\n");}
+        : BlockUp StatementList '}' {dump_symbol();}
 ;
 BlockUp
         : '{' { create_symbol();}
@@ -765,7 +765,7 @@ Condition
 
 ForStmt
         : FOR ForClause Block
-        | FOR { fprintf(fp, "L_for_begin:\n"); } Condition Block
+        | FOR { fprintf(fp, "L_for_begin:\n"); } Condition Block {fprintf(fp, "goto L_for_begin\n"); fprintf(fp, "L_for_exit:\n");}
 ;
 
 ForClause
